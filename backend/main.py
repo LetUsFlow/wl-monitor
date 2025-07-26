@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import requests
 import csv
@@ -6,20 +7,19 @@ import csv
 app = FastAPI()
 router = APIRouter(prefix="/api")
 
-lines = [] # LineID;LineText;SortingHelp;Realtime;MeansOfTransport
+lines = {} # LineID;LineText;SortingHelp;Realtime;MeansOfTransport
 routes = [] # LineID;PatternID;StopSeqCount;StopID;Direction
 stops = {} # StopID;DIVA;StopText;Municipality;MunicipalityID;Longitude;Latitude
 
 with open("data/wienerlinien-ogd-linien.csv", "r", encoding="utf-8") as f:
     reader = csv.DictReader(f, delimiter=';')
     for row in reader:
-        lines.append({
-            "LineID": int(row["LineID"]),
+        lines[row["LineID"]] = { # keys in json can only be strings, so conversion is not needed
             "LineText": row["LineText"],
             "SortingHelp": int(row["SortingHelp"]),
             "Realtime": row["Realtime"] == "1",
             "MeansOfTransport": row["MeansOfTransport"]
-        })
+        }
 
 with open("data/wienerlinien-ogd-haltepunkte.csv", "r", encoding="utf-8") as f:
     reader = csv.DictReader(f, delimiter=';')
@@ -59,7 +59,7 @@ def read_lines():
     """
     Retrieve all lines with their details.
     """
-    return {"lines": lines}
+    return lines
 
 @router.get("/route/{line_id}")
 def read_route(line_id: int):
@@ -71,7 +71,7 @@ def read_route(line_id: int):
         if r["LineID"] == line_id:
             route.append(r)
     if route:
-        return {"route": route}
+        return {"route": route, "LineText": lines[str(line_id)]["LineText"]}
     raise HTTPException(status_code=404, detail="Route not found")
 
 @router.get("/stop/{stop_id}")
@@ -86,6 +86,12 @@ def read_stop(stop_id: int):
     stop = requests.get(f"https://www.wienerlinien.at/ogd_realtime/monitor?diva={stop['DIVA']}").json()
     stop.update(stops[stop_id])
     return stop
+
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc: HTTPException):
+    if request.url.path.startswith("/api"):
+        raise exc
+    return FileResponse("static/index.html")
 
 app.include_router(router)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

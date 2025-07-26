@@ -8,6 +8,7 @@ export interface RouteStop {
   DIVA: number;
 }
 
-export interface RouteDto {
+export interface TransportRoute {
   route: RouteStop[];
+  LineText: string;
 }

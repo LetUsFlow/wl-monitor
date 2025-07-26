@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DefaultService } from '../../service/default.service';
 import { MatChip, MatChipSet } from '@angular/material/chips';
-import { RouteStop } from '../../dto/route';
+import { TransportRoute } from '../../dto/route';
 
 @Component({
   selector: 'app-stop-selector',
@@ -15,9 +15,8 @@ export class StopSelector implements OnInit {
   route = inject(ActivatedRoute);
   router = inject(Router);
 
-  stops: RouteStop[] = [];
-
-  error: string | undefined = undefined;
+  transportRoute: TransportRoute | undefined;
+  error: string | undefined;
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -25,8 +24,9 @@ export class StopSelector implements OnInit {
       if (lineId) {
         this.defaultService.getRoute(Number(lineId)).subscribe({
           next: data => {
-            this.stops = data.route;
+            this.transportRoute = data;
             this.error = undefined;
+            console.log('Transport Route:', this.transportRoute);
           },
           error: err => {
             this.error = err.error.detail;

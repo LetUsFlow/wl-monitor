@@ -1,5 +1,5 @@
 <mat-chip-set aria-label="Line selection">
-  @for (line of lines; track line.LineID) {
-    <mat-chip (click)="selectLine(line.LineID)">{{line.LineText}}</mat-chip>
+  @for (line of lines | keyvalue; track line.key) {
+    <mat-chip (click)="selectLine(line.key)">{{line.value.LineText}}</mat-chip>
   }
 </mat-chip-set>
