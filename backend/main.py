@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.staticfiles import StaticFiles
 import requests
 import csv
 
@@ -87,3 +88,4 @@ def read_stop(stop_id: int):
     return stop
 
 app.include_router(router)
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
