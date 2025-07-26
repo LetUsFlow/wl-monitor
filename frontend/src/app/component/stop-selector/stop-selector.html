@@ -1,0 +1,10 @@
+@if (error) {
+  <div>Error fetching stops: {{ this.error }}</div>
+} @else {
+  <mat-chip-set aria-label="Stop selection">
+    @for (stop of stops; track stop) {
+      <mat-chip (click)="selectStop(stop.StopID)">{{stop.StopText}}, DIVA: {{stop.DIVA}} @if (stop.Direction)
+          { (Direction: {{stop.Direction}}) }</mat-chip>
+    }
+  </mat-chip-set>
+}

@@ -1,0 +1,11 @@
+<h1>{{ stop?.StopText }}</h1>
+
+@if (stop) {
+  @for (monitor of stop.data.monitors; track monitor.locationStop) {
+    @for (line of monitor.lines; track line.lineId) {
+      <app-line-card [line]="line"></app-line-card>
+    }
+  }
+} @else {
+  <p>Loading...</p>
+}
