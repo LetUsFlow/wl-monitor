@@ -6,20 +6,19 @@
   <mat-card-content>
     <div>
         <p>Abfahrten</p>
-        <ul>
-            @if (line().type === 'ptMetro') {
-                @for (departure of line().departures.departure.slice(0, 2); track departure) {
-                    <li>
-                        @if (departure.vehicle) { _ }
-                        {{ departure.departureTime.countdown }}
-                    </li>
-                }
-            } @else {
-                @for (departure of line().departures.departure; track departure) {
-                    <li>{{ departure.departureTime.countdown }}</li>
-                }
+        <table>
+            @for (departure of line().departures.departure; track departure) {
+                <tr>
+                    <td>{{ line().towards.trim() }}</td>
+                    <td>
+                        @if (departure.vehicle?.foldingRamp) { _ }
+                        @else if (departure.vehicle?.barrierFree) { . }
+                        @else if (departure.vehicle?.barrierFree == undefined && line().barrierFree) { . }
+                    </td>
+                    <td>{{ departure.departureTime.countdown }}</td>
+                </tr>
             }
-        </ul>
+        </table>
     </div>
   </mat-card-content>
 </mat-card>
